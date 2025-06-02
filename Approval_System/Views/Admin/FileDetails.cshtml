@@ -1,0 +1,60 @@
+﻿@model Approval_System.Models.FileItem
+
+<h2>تفاصيل الملف: @Model.Title</h2>
+
+<p><strong>الوصف:</strong> @Model.Description</p>
+<p><strong>تاريخ الإنشاء:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+<p><strong>أنشأه:</strong> @Model.CreatedBy?.Name</p>
+<p><strong>الحالة العامة:</strong> @Model.Status</p>
+
+@if (Model.Status == "مرفوض" && Model.WorkflowSteps.Any(w => w.IsRejected))
+{
+    <form asp-action="ResumeWorkflow" asp-controller="Admin" method="post" style="margin: 20px 0;">
+        <input type="hidden" name="fileId" value="@Model.Id" />
+        <button type="submit" class="btn btn-warning">استثناء الرافض واستكمال الموافقات</button>
+    </form>
+}
+
+<hr />
+
+<h4>سجل الموافقات</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>المستخدم</th>
+            <th>الترتيب</th>
+            <th>الإجراء</th>
+            <th>تاريخ الإجراء</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var step in Model.WorkflowSteps.OrderBy(s => s.Order))
+        {
+            <tr>
+                <td>@step.User.Name</td>
+                <td>@step.Order</td>
+                <td>
+                    @if (step.IsApproved)
+                    {
+                        <span class="text-success">موافقة</span>
+                    }
+                    else if (step.IsRejected)
+                    {
+                        <span class="text-danger">
+                            @(string.IsNullOrEmpty(step.Action) ? "رفض" : step.Action)
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-warning">قيد الانتظار</span>
+                    }
+                </td>
+                <td>
+                    @step.ApprovedAt?.ToString("yyyy-MM-dd HH:mm") 
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("FileList", "Admin")" class="btn btn-secondary">رجوع للقائمة</a>

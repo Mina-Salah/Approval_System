@@ -1,0 +1,68 @@
+﻿@model List<Approval_System.Models.WorkflowStep>
+
+<h3>الملفات المرتبطة بك</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>اسم الملف</th>
+            <th>الوصف</th>
+            <th>تاريخ الإنشاء</th>
+            <th>الحالة</th>
+            <th>إجراء</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var step in Model)
+        {
+            <tr>
+                <td>@step.FileItem.Title</td>
+                <td>@step.FileItem.Description</td>
+                <td>@step.FileItem.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+
+                <td>
+                    @if (step.IsRejected)
+                    {
+                        <span class="text-danger">مرفوض</span>
+                    }
+                    else if (step.IsApproved)
+                    {
+                        <span class="text-success">موافق</span>
+                    }
+                    else if (step.FileItem.SentToUserId == step.UserId)
+                    {
+                        <span class="text-primary">بانتظار إجراءك</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">بانتظار الدور</span>
+                    }
+                </td>
+
+                <td>
+                    @if (!step.IsApproved && !step.IsRejected && step.FileItem.SentToUserId == step.UserId)
+                    {
+                        <form asp-action="Approve" asp-route-id="@step.Id" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-success btn-sm">موافقة</button>
+                        </form>
+                        <form asp-action="Reject" asp-route-id="@step.Id" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">رفض</button>
+                        </form>
+                    }
+                    else if (step.IsRejected)
+                    {
+                        <span class="text-danger">أنت رفضت هذا الملف</span>
+                    }
+                    else if (step.IsApproved)
+                    {
+                        <span class="text-success">أنت وافقت على هذا الملف</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">بانتظار دورك</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

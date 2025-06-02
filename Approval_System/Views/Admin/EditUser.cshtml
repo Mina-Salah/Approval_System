@@ -1,0 +1,36 @@
+﻿@model Approval_System.ViewModel.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "تعديل مستخدم";
+}
+
+<h2 class="mb-4">تعديل مستخدم</h2>
+
+<form asp-action="EditUser" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label">كلمة المرور (اتركها فارغة إذا لا تريد تغييرها)</label>
+        <input asp-for="Password" class="form-control" type="password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+    <a asp-action="UserList" class="btn btn-secondary">إلغاء</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
