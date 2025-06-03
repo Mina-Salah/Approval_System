@@ -1,30 +1,32 @@
 ﻿@model Approval_System.Models.FileItem
 
-<h2>تفاصيل الملف: @Model.Title</h2>
+<h2>File Details: @Model.Title</h2>
 
-<p><strong>الوصف:</strong> @Model.Description</p>
-<p><strong>تاريخ الإنشاء:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
-<p><strong>أنشأه:</strong> @Model.CreatedBy?.Name</p>
-<p><strong>الحالة العامة:</strong> @Model.Status</p>
+<p><strong>Description:</strong> @Model.Description</p>
+<p><strong>Created At:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+<p><strong>Created By:</strong> @Model.CreatedBy?.Name</p>
+<p><strong>Status:</strong> @Model.Status</p>
 
-@if (Model.Status == "مرفوض" && Model.WorkflowSteps.Any(w => w.IsRejected))
+@if (Model.Status == "Rejected" && Model.WorkflowSteps.Any(w => w.IsRejected))
 {
-    <form asp-action="ResumeWorkflow" asp-controller="Admin" method="post" style="margin: 20px 0;">
+    <form asp-action="ResumeWorkflow" asp-controller="Admin" method="post" class="my-3">
         <input type="hidden" name="fileId" value="@Model.Id" />
-        <button type="submit" class="btn btn-warning">استثناء الرافض واستكمال الموافقات</button>
+        <button type="submit" class="btn btn-warning">
+            Override Rejection and Continue Approval
+        </button>
     </form>
 }
 
 <hr />
 
-<h4>سجل الموافقات</h4>
-<table class="table table-bordered">
-    <thead>
+<h4>Approval History</h4>
+<table class="table table-bordered table-striped">
+    <thead class="table-light">
         <tr>
-            <th>المستخدم</th>
-            <th>الترتيب</th>
-            <th>الإجراء</th>
-            <th>تاريخ الإجراء</th>
+            <th>User</th>
+            <th>Order</th>
+            <th>Action</th>
+            <th>Action Date</th>
         </tr>
     </thead>
     <tbody>
@@ -36,17 +38,17 @@
                 <td>
                     @if (step.IsApproved)
                     {
-                        <span class="text-success">موافقة</span>
+                        <span class="text-success">Approved</span>
                     }
                     else if (step.IsRejected)
                     {
                         <span class="text-danger">
-                            @(string.IsNullOrEmpty(step.Action) ? "رفض" : step.Action)
+                            @(string.IsNullOrEmpty(step.Action) ? "Rejected" : step.Action)
                         </span>
                     }
                     else
                     {
-                        <span class="text-warning">قيد الانتظار</span>
+                        <span class="text-warning">Pending</span>
                     }
                 </td>
                 <td>
@@ -57,4 +59,4 @@
     </tbody>
 </table>
 
-<a href="@Url.Action("FileList", "Admin")" class="btn btn-secondary">رجوع للقائمة</a>
+<a href="@Url.Action("FileList", "Admin")" class="btn btn-secondary mt-3">Back to List</a>

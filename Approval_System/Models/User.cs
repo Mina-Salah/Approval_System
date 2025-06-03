@@ -16,6 +16,7 @@ namespace Approval_System.Models
         public string PasswordHash { get; set; }
 
         public string Role { get; set; } = "User";
+        public bool IsDeleted { get; set; } // جديد
 
         public ICollection<WorkflowStep> WorkflowSteps { get; set; }
     }

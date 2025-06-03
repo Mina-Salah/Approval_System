@@ -1,6 +1,19 @@
 ﻿@model List<Approval_System.Models.FileItem>
 
+@{
+    ViewData["Title"] = "قائمة الملفات";
+    bool allApproved = Model != null && Model.Any() &&
+                       Model.All(f => string.Equals(f.Status?.Trim(), "موافق", StringComparison.OrdinalIgnoreCase));
+}
+
 <h2 class="mb-4">قائمة الملفات</h2>
+
+@if (allApproved)
+{
+    <div class="alert alert-success text-center fw-bold">
+        ✅ جميع الملفات موافقة
+    </div>
+}
 
 <div class="col-md-4 mb-4">
     <div class="card-body text-center">
@@ -19,31 +32,43 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var file in Model)
+        @if (Model != null && Model.Any())
+        {
+            foreach (var file in Model)
+            {
+                <tr>
+                    <td>@file.Title</td>
+                    <td>@file.Description</td>
+                    <td>
+                        @{
+                            var statusClean = file.Status?.Trim();
+                            if (string.Equals(statusClean, "موافق", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="text-success fw-bold">✅ موافق</span>
+                            }
+                            else if (string.Equals(statusClean, "مرفوض", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="text-danger fw-bold">❌ مرفوض</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning fw-bold">⏳ قيد الانتظار</span>
+                            }
+                        }
+                    </td>
+                    <td>@file.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        <a href="@Url.Action("FileDetails", "Admin", new { id = file.Id })" class="btn btn-info btn-sm">
+                            تفاصيل الملف
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@file.Title</td>
-                <td>@file.Description</td>
-                <td>
-                    @if (file.Status == "موافق")
-                    {
-                        <span class="text-success fw-bold">✅ موافق</span>
-                    }
-                    else if (file.Status == "مرفوض")
-                    {
-                        <span class="text-danger fw-bold">❌ مرفوض</span>
-                    }
-                    else
-                    {
-                        <span class="text-warning fw-bold">⏳ قيد الانتظار</span>
-                    }
-                </td>
-                <td>@file.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                <td>
-                    <a href="@Url.Action("FileDetails", "Admin", new { id = file.Id })" class="btn btn-info btn-sm">
-                        تفاصيل الملف
-                    </a>
-                </td>
+                <td colspan="5">لا توجد ملفات.</td>
             </tr>
         }
     </tbody>

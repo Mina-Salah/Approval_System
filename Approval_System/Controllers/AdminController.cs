@@ -54,7 +54,6 @@ namespace Approval_System.Controllers
             return View(users);
         }
 
-
         [HttpGet]
         public IActionResult CreateFile()
         {
@@ -187,15 +186,32 @@ namespace Approval_System.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("UserList");
         }
-        [HttpPost]
 
-        public async Task<IActionResult> DeleteUser(int id)
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreUser(int id)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == id && u.Role == "User");
+            var user = _context.Users.IgnoreQueryFilters().FirstOrDefault(u => u.Id == id && u.IsDeleted);
             if (user == null)
                 return NotFound();
 
-            _context.Users.Remove(user);
+            user.IsDeleted = false;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("DeletedUsers");
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = _context.Users.IgnoreQueryFilters().FirstOrDefault(u => u.Id == id && u.Role == "User");
+            if (user == null)
+                return NotFound();
+
+            user.IsDeleted = true;
             await _context.SaveChangesAsync();
 
             return RedirectToAction("UserList");
@@ -260,6 +276,19 @@ public async Task<IActionResult> ResumeWorkflow(int fileId)
 
     return RedirectToAction("FileDetails", new { id = fileId });
 }
+
+
+        [HttpGet]
+        public IActionResult DeletedUsers()
+        {
+            var deletedUsers = _context.Users
+                .IgnoreQueryFilters()
+                .Where(u => u.Role == "User" && u.IsDeleted)
+                .ToList();
+
+            return View("DeletedUsers", deletedUsers);
+        }
+
 
     }
 

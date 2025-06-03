@@ -15,45 +15,47 @@ namespace Approval_System.data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Admin ثابت
+            // بيانات المستخدم الأدمن الافتراضي
             modelBuilder.Entity<User>().HasData(new User
             {
                 Id = 1,
                 Name = "Admin",
                 Email = "admin@system.com",
                 PasswordHash = "admin123",
-                Role = "Admin"
+                Role = "Admin",
+                IsDeleted = false
             });
-    
-            // منع الحذف المتسلسل من WorkflowStep → User
+
+            // Soft Delete: فلتر افتراضي لاستبعاد المحذوفين من المستخدمين
+            modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+
+            // العلاقات بين WorkflowStep و User
             modelBuilder.Entity<WorkflowStep>()
                 .HasOne(w => w.User)
                 .WithMany(u => u.WorkflowSteps)
                 .HasForeignKey(w => w.UserId)
-                .OnDelete(DeleteBehavior.Restrict); // 👈 هذا هو المفتاح
+                .OnDelete(DeleteBehavior.Restrict); // منع حذف المستخدم لو مرتبط بخطوات الموافقة
 
-            // منع الحذف المتسلسل من WorkflowStep → FileItem
+            // العلاقات بين WorkflowStep و FileItem
             modelBuilder.Entity<WorkflowStep>()
                 .HasOne(w => w.FileItem)
                 .WithMany(f => f.WorkflowSteps)
                 .HasForeignKey(w => w.FileItemId)
-                .OnDelete(DeleteBehavior.Cascade); // مسموح بواحدة فقط تكون Cascade
+                .OnDelete(DeleteBehavior.Cascade); // حذف خطوات الملف مع الملف نفسه
 
-            // نفس الشيء مع FileItem → CreatedBy
+            // العلاقة بين FileItem و CreatedBy (المستخدم الذي أنشأ الملف)
             modelBuilder.Entity<FileItem>()
                 .HasOne(f => f.CreatedBy)
                 .WithMany()
                 .HasForeignKey(f => f.CreatedById)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // علاقة الموظف المستلم
+            // العلاقة بين FileItem و SentToUser (المستخدم الحالي المطلوب منه الموافقة)
             modelBuilder.Entity<FileItem>()
                 .HasOne(f => f.SentToUser)
                 .WithMany()
                 .HasForeignKey(f => f.SentToUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
-
     }
-
 }
